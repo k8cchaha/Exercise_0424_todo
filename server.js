@@ -53,6 +53,52 @@ const requestListener = (req, res) => {
         errorHandle(res, "有錯誤發生");
       }
     });
+  } else if (req.url.startsWith("/todos/") && req.method == "DELETE") {
+    const id = req.url.split("/").pop();
+    const idx = todos.findIndex((ele) => {
+      return ele.id == id;
+    });
+    if (idx !== -1) {
+      todos.splice(idx, 1);
+    } else {
+      errorHandle(res, "錯誤的參數");
+    }
+    res.writeHead(200, headers);
+    res.write(
+      JSON.stringify({
+        status: "success",
+        data: todos,
+      })
+    );
+    res.end();
+  } else if (req.url.startsWith("/todos/") && req.method == "PATCH") {
+    req.on("end", () => {
+      try {
+        const id = req.url.split("/").pop();
+        const todo = JSON.parse(body).title;
+        const idx = todos.findIndex((ele) => {
+          return ele.id == id;
+        });
+        console.log("id", id);
+        console.log("todo", todo);
+        console.log("idx", idx);
+        if (idx !== -1 && todo !== undefined) {
+          todos[idx].title = todo;
+          res.writeHead(200, headers);
+          res.write(
+            JSON.stringify({
+              status: "success",
+              data: todos,
+            })
+          );
+          res.end();
+        } else {
+          errorHandle(res, "錯誤的參數");
+        }
+      } catch (err) {
+        errorHandle(res, "有錯誤發生");
+      }
+    });
   } else if (req.method == "OPTIONS") {
     res.writeHead(200, headers);
     res.end();
